@@ -1,0 +1,1541 @@
+\documentclass[a4paper,10pt]{report}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{amssymb}
+% amssymb for \varnothing , alternative for null or empty set 
+
+% need to run with pdflatex not latex - otherwise get errors about width of doc
+
+% other [options]: draft, 11pt notitlepage - draft uses placeholders for figs and is faster.
+
+% v0.3 30/8/16 + (after printing out v0.2) 
+% v0.2 25/7/16 +
+
+% example taken from https://www.rpi.edu/dept/arc/training/latex/Examples/exrep.tex
+
+% bibligraphy stuff from https://www.latex-tutorial.com/tutorials/beginners/latex-bibtex/
+%  pdflatex %.tex
+%  bibtex %.aux 
+%  2x pdflatex 
+
+%  grep -i undef tech_report.v0.3.log 
+%
+% this is really good! see also 09 tables from csv ! 
+% 11 and 12 tikz and circuitikz
+% 3 packages; for loc - stackexch q -> $ kpsepath tex
+
+% tables:
+% in R sthg like 
+% write.table(dat,file="testwr.txt",quote=F,row.names=F,sep=" & ",eol="\\\\\n")
+
+% You could have a two-line eol= also including \hline 
+% note doesn't give the |c|c| line 
+% sthg like paste(rep("c",length(names(dat))),collapse="|")
+%texttt
+%
+% lots of examples of equations/maths: http://www.personal.ceu.hu/tex/cookbook.html 
+% formatting captions:subcaption doc and http://www.peteryu.ca/tutorials/publishing/latex_captions
+
+\newcommand{\psortbase}{/home/ngrs2/work/bsu/PSORT_Zuliani_Reynolds/}
+\newcommand{\zhangmatlab}{\psortbase/zhang_model}
+\newcommand{\sbmlbase}{\psortbase/sbml-sh/}
+\newcommand{\zhangsbml}{\sbmlbase/zhang_model}
+\newcommand{\sophiesbml}{\sbmlbase/sophie_like}
+\newcommand{\sophienlgo}{\psortbase/netlogo_model}
+\newcommand{\jonessbml}{\sbmlbase/jones_like}
+\newcommand{\lisbml}{\sbmlbase/li_like}
+% make subfigure labels capital A,B,C not (a),(b),(c)
+\renewcommand{\thesubfigure}{\Alph{subfigure}}
+\captionsetup[subfigure]{labelformat=simple, labelsep=space}
+
+\title{\bf Investigations of Psoriasis Models} 
+\author{G.~R.~Smith}   
+\date{\today}                           %   Use current date.
+
+\begin{document}                        % End of preamble, start of text.
+\maketitle                              % Print title page.
+\pagenumbering{roman}                   % roman page number for toc
+\setcounter{page}{2}                    % make it start with "ii"
+\tableofcontents                        % Print table of contents
+
+\chapter{Introduction}                % Print a "chapter" heading
+\pagenumbering{arabic}                  % Start text with arabic 1
+
+\section{Background to the Epidermis}
+
+The organ we wish to model is primarily the epidermis of the skin. The architecture of the skin is shown in figure \ref{fig:mathes_skinarch} (from \cite{mathes2014use}), having three layers, the subcutaneous layer, the dermis, in which blood vessels, hair follicles and glands lie, and the outer epidermis which performs a barrier function. The epidermis has a proliferative compartment of stem cells (SC) and transit amplifying (TA) cells, which reside in the basal layer and continually divide, and a non-proliferative compartment, into which TA cells move and differentiate. They pass through the stages of spinous cells (SP), granulocyte cells (GC) and corneocyte cells (CC), driven primarily by a Ca$^{2+}$ gradient. (There may be a stage of growth arrest (GA) between TA and SP stages.) In normal skin, by the time the cells have become corneocytes they have lost their nuclei and most of their cytoplasm to become an inpermeable, protective layer. The junction between the epidermis and dermis below is undulating, (rete redges, though they are finger-like rather than wave-like). Other cell types (particularly immune cells) may enter the epidermis from the dermis. 
+
+
+\begin{figure}[h!]
+    \centering  
+  \begin{subfigure}{.7\textwidth}
+    \includegraphics[width=\linewidth]{figs/mathes_fig2.jpg}
+  \end{subfigure}
+  \caption{Schematic diagram of the skin, showing epidermis, dermis and subcutis (hypodermis). From \cite{mathes2014use}}
+  \label{fig:mathes_skinarch}
+\end{figure}
+
+
+\section{Background to Psoriasis}
+
+Psoriasis is characterized by thickening and scaling of the epidermis. Despite the increased thickness of the epidermis, its turnover time is much reduced. References to reviews of Psoriasis can be found in Sophie Weatherhead's Thesis and paper, and the Zhang paper. Reviews include \cite{lowes2007pathogenesis, griffiths2007pathogenesis} (see more below). There are also reference works with a clinical perspective, e.g. \cite{camisa2008handbook}. 
+
+Plaque psoriasis ({\em psoriasis vulgaris}) is the most common type, with red well demarcated plaques and white scale. The extensor elbows and knees are often involved. Other varieties include inverse (in folds), pustular (localised, often palmoplantar or generalised), erythrodermic and guttate psoriasis - small scattered pink to red papules and plaques ({\em gutta} -- drop). . Flare (especially of guttate and inverse) is often incited by streptococcal infection, especially within folds of the skin, or as sore throat. Patients with pustular and erythrodermic psoriasis, in particular, may be seriously ill and require hospitalisation. However the . See \cite{camisa2008handbook} chapter 2 for details. 
+% , if I understand correctly
+
+Psoriatic Arthritis: about 15\%-25\% of psoriasis patients also develop an inflmammation in the joints. Typically the patient will experience psoriasis for months or years before joint involvement. May lead to severe joint damamge. Inflammation may also affect other organs (heart, eyes, kidneys, lungs). 
+
+Immune cells may increase their number in the epidermis. The T-cell rich infiltrate is often perivascular and interstitial. There are neutrophils at the junction of cornified and granular layers (subcorneal pustules of Kogoj). The  granular layer is thinned and may be missing, and the corneocytes retain nuclei. Chemokine receptors and chemokines associated with psoriasis are reviewed in Mabuchi et al \cite{mabuchi2012chemokine}, which also  has a good more general introduction.
+
+As well as keratinocytes effector memory T cells remain in the dermis and epidermis [Mab. ref 5]. After clinical resolution, a genetic signature remains \cite{suarez2011resolved}, the ``residual disease genomic profile''. 
+
+Other triggers of psoriasis:
+Trauma to the skin (cut, scrape, insect bite, sunburn). This is known as the Koebner Response.
+Drugs (Lithium, ACE inhibitors (Angiotensin-Converting-Enzyme treatment for high blood pressure), beta blockers (treatment for angina, congestive heart failure, and other conditions), some antimalarials, some NSAIDs e.g. indomethacin, ibuprofen).
+Hormonal changes, esp. in women (puberty, menopause).
+heavy drinking, smoking, stress. 
+HIV. 
+
+
+There is structural remodelling of the epidermis: as well as thickening,
+there is lengthening of the rete ridges. This has 
+been modelled computationally, starting with \cite {iizuka2004psoriatic} (also other work by these authors, cited in (Weatherhead thesis)).
+
+Gene expression changes have been found in the psoriatic epidermis of psoriasis
+suffers compared to normal controls (See Sophie Weatherhead's thesis and 
+notes in discussion of this document); there are also differences between 
+affected and non-affected skin (the investigation of which is central to PSORT
+itself). 
+
+Susceptibility loci include TCR/HLA and recent work \cite{arakawa2015melanocyte} provides evidence that psoriasis may be an autoimmune disease based on response to ADAMTSL5 produced by melanocytes. (see also comment on Arakawa et al by Kruger mentioning another candidate autoantigen, cathelicidin). Older reviews (\cite{griffiths2007pathogenesis, nestle2009immune, nestle2009mechanisms}) generally assert that it is not a bona fide autoimmune disease, or that its status is
+unclear, though it is clear that it had been often suggested and Nestle seemed to be moving towards saying that it was in his second (NRI) review. Lowes, Bowcock and Kruger \cite{lowes2007pathogenesis} characterized it as autoimmune in 2007.
+Much work has been done on finding other susceptibility loci
+(google sch. - see ellinghaus\_gwas\_notes.txt). These may be shared with 
+other chronic inflammatory diseases - a recent paper compares psoriais with ankylosing spondylitis,
+Crohn’s disease, primary sclerosing cholangitis (PSC) and
+ulcerative colitis, and also briefly mentions rheumatoid arthritis (RA) and asthma \cite{ellinghaus2016analysis}.
+A recent comprehensive review of the immunogenetics of psoriasis is \cite{harden2015immunogenetics}. Epidemiology (i.e. a tendency towards inheritance) also provides evidence of genetic influence.
+
+\subsection{Prevalence and Epidemiology}
+
+The prevalence of psoriasis is often quoted at about 2\%. It seems 
+that there may be regional and ethnic variation, though this may be complicated
+by different diagnostic procedures in different parts of the world. Rates of around 2\% seem typical for studies on the general population in the UK and USA; it may be higher for those in Northern and Southern Europe, with several studies from Nordic nations reporting rates of 4\% or more \cite{parisi2013global}.  
+The rate seems to be lower in African-Americans, Nigerians, and Indians, about 0.7\% for those groups (\cite{parisi2013global,christophers2001psoriasis}), and much lower in Asians (0.12-0.4\%in Han Chinese \cite{zhang2002genetic,christophers2001psoriasis}). Some studies report a higher prevalence in males than females, and others the reverse or no significant difference \cite{parisi2013global}.  
+
+\subsection{Assessment}
+
+PASI score - 
+Though a rather unfortunate forcing of the levels of a ordered categorical variable into what seems to be a continuous variable. It also does not include other relevant information about e.g. the frequency of relapse or the tendency of the plaques to be 
+
+
+\subsection{Treatments}
+
+Primarily immune modulatory or phototherapy (UVB). Immune modulatory treatment can include topical steroid creams (also creams that modulate Ca$^{2+}$), and anti-TNF$\alpha$ biologicals such as etanercept, infliximab and adalimumab \cite{kircik2009anti}. These are mostly antibodies, although etanercept is an engineered TNF receptor. Biologicals with other targets e.g. IL-23 are also used.
+
+
+UVB phototherapy at $\lambda=$311 nm, but not 290 nm, is effective via induction of apoptosis \cite{weatherhead2011keratinocyte}. Phototherapy by laser can also be used. However, in keratinocytes  DNA damage is linked to promotion of differentiation rather than apoptosis as the damaged cells may be lost by desquamation\cite{freije2014inactivation,gandarillas2000normal}.
+
+\subsection{Onset}
+
+
+I have done pubmed searches for e.g. kinetics of psoriasis (321 refs), psoriasis streptococcal (344 refs). Unfortunately searching for kinetics of psoriasis onset tends to produce papers about the age of onset. Papers on e.g. cell/cyto kinetics are often quite old. The clinical kinetics of psoriasis lesions (Grosshans et al) looks interesting but is a french-language publciation not available online. 
+first page interesing: Doger et al 2007, Monfrecola and Baldo, Nestle et al, Emson et al, Raychaudhuri et al revisiting the koebner phenom., Riis et al kinetics and DE of CCL27 and 17, Nakajima Kinetics of Th17 cytokines
+
+
+(Kawashima et al Evaluation of cell death and proliferation in psoriatic epidermis. 2004)
+(Laptev and Nikulin Synch. of osciallations of proliferation of keratinocytes..)
+(simonart et al cell 2010 - epidermal kinetic alterations required to generate the psoriatic phenotype)
+
+
+
+Is streptococcus unique in its ability to provoke flare, or can other infections do so? Certainly strep. seems unusual - see psoriasis streptococcal search. Usually guttate (or sometimes plaque) as a result. See also PMC images. 
+guttate resp to Strep. mainly occurs in HLA-Cw6(+) (but this genotype is not essential - Fry et al 06. Presentation of strep. cell wall proteins to dermal Th1 cells... superantigen ... peptidoglycan...
+Guttate vs plaque - Davison 2001. 
+mTORC2-Akt1 in psoriais Chen 2013
+McFadden .. 2ppr, ECM 2012, Ps and Strep 2009 
+
+\section{Basic Numerical Information for Normal/Psoriatic Skin}
+\begin{quote}
+ 
+Cell number(physiological): 44k/mm$^2$(forearm) and 75k/mm$^2$(breast), Zhang p6 \\
+Cell number(simulation): 1000(normal) and 5000(Pso),chosen for about 1/50mm$^2$\\
+In Normal skin:
+Proliferating/differentiated: (SC+TA+GA)=22\% (SP+GC+CC)=78\%; Corneocytes: CC=26\%, Zhang p6\\
+SC/TA (est 1):  1/5, Zhang p5 ref 32 (Morris 1983, but measurements in Mice)\\
+SC/TA (est 2): 1/11, (Apoptotic cell counts in Pso) Weatherhead p1921\\
+Turnover time: 28d (normal) and 11d (Pso), Whead p 1921 Zhang p6\\
+The proportions of cell types are summarized in figure \ref{fig:psoriasis_cell_numbers}.
+\end{quote} 
+\begin{figure}[h!]
+  \begin{subfigure}{.9\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\sbmlbase/cell_numbers_bar.png}
+  \end{subfigure}
+  \caption{All: relative cell numbers in normal and psoriatic epidermis; other bars express the fraction of total cells of each kind in the two conditions. 
+Cell types:  stem cells (SC), transit amplifying cells (TA), growth arrested cells (GA), spinous cells (SP), granulocyte cells (GC) and corneocyte cells (CC). 
+P=Proliferating=(SC+TA+GA) D=Differentiated=(SP+GC+CC). Data mostly from \cite{zhang2015modelling}}
+  \label{fig:psoriasis_cell_numbers}
+\end{figure}
+
+
+Transit times: also mentioned in Morris, from $^3$H-Thymidine; N.J.R. also mentioned radiolabelling experiments done historically. 
+
+
+\chapter{The Zhang Model}
+
+This paper \cite{zhang2015modelling} introduced the idea of a normal and faster-turning-over psoriatic population competing for the stem cell niche. Within each population the proliferation and differentiation processes occur as described in the introduction (figure \ref{fig:zhangfig1diff})
+
+\begin{figure}[h!]
+  \begin{subfigure}{.9\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{/home/ngrs2/Pictures/zhang_fig1.png}
+  \end{subfigure}
+  \caption{Differention of cell lineages in the Zhang model}
+  \label{fig:zhangfig1diff}
+\end{figure}
+
+
+The model was made available in the form of matlab m-files using ode14 to integrate ODEs and a hand-coded version of the Gillespie algorithm to integrate SDEs. 
+The matlab m files were converted to sbml-sh
+
+\section{Contents of the Zhang Paper}
+
+The basic model of the epidermis is described first (section 2.1), with normal cells only, Then the coupled model of cell migration (sect. 2.2) which is 
+used to visualize output of Stochastic DE simulations. Figures 1--3 describe the normal skin model, then fig. 4 in section 3.1 presents timecourses of approach to equilibrium, homeostatic cell populations and a visualization of the epidermis using an agent-based model (see below). Section 3.2 presents calculation of the epidermal turnover time.
+Only in section 3.3 is the psoriatic model introduced with modified equations
+describing competition of normal and pso SC, and an equation of immune killing of the psoriatic stem cells. Figure 5 describes the competition between normal and stem cells (further gone into in the appendix) and figure 6 shows a treatment  scenario based on \cite{weatherhead2011keratinocyte} (via UV irradiation episodes which briefly increase apoptosis $10^4$-fold) and recovery. However, the epidermis becomes very thin during treatment and the recovery takes $\tilde 1$ year. More information is given in supplementary figure S3. 
+
+The supplementary material also describes in detail an agent-based cell migration model that is introduced in figure 3, and which produces images of the epidermis in figures 4 and S4. 
+
+Appendix A Describes a simplified version of the competition between psoriatic and normal
+SC, with rate balance plots, bifurcation diagram and phase space trajectories (fig 7). The justification for neglecting the effect of TA cells is that ratios of SC proliferation rates (e.g. $k_{1s}/\gamma_1$) are not affected by the it. However the ratios of normal SC to Psoriatic SC parameters are unaffected (see also section \ref{sec:intTASC}).
+
+Expressions are also given for the turnover times (these are dominated by the desquamation rate $\alpha$.)
+
+
+\section{Our Investigations}
+
+These are focused on the treatment scenario, when goes into the psoriatic state then is reverted to normal by episodes of UV treatment increasing apoptosis. 
+ (see Zhang Treatment Scenario\ref{sec:ztreatment} below)
+FIGURE
+
+\subsection{Psoriatic Cell Division Parameters}
+
+Parameters $\rho$ describe how much faster psoriatic cells divide than normal
+(There is one for each cell type, but they are all equal to 4 or 5). The default behaviour is given in fig. \ref{fig:rho4}:
+
+% presentation ../update_24sep15/present_grs.v2c.pptx (GSK version Sep 15 more or less)
+% figs ../../zhang_model/expts/division/
+
+\begin{figure}[h!]
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\zhangmatlab/expts/division/rho4/fig6a_rho4.png}
+% opt caption (for A,B etc) and label 
+  \end{subfigure}
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\zhangmatlab/expts/division/rho4/totcell_rho4.png}
+  \end{subfigure}
+  \caption{$\rho=4$}
+  \label{fig:rho4}
+\end{figure}
+
+Varying these parameters (all are changed collectively) to values below 3 led to Normal cells outcompeting psoriatic at all times(fig. \ref{fig:rho2}), and above 7 led to psoriatic cells taking over again, despite the irradiation treatment (fig. \ref{fig:rho7}):
+
+\begin{figure}[h!]
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\zhangmatlab/expts/division/rho2/fig6a_rho2.png}
+% opt caption (for A,B etc) and label 
+  \end{subfigure}
+  \caption{$\rho=2$}
+  \label{fig:rho2}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\zhangmatlab/expts/division/rho7/fig6a_rho7.png}
+% opt caption (for A,B etc) and label 
+  \end{subfigure}
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\zhangmatlab/expts/division/rho7/totcell_rho7.png}
+  \end{subfigure}
+  \caption{$\rho=7$}
+  \label{fig:rho7}
+\end{figure}
+
+
+
+
+%Use experimental data for apoptosis rates. 
+
+%\begin{quote}
+%TODO
+%\end{quote}
+
+
+\subsection{Immune Killing}
+
+
+An “Immune killing” term is present in the equations for Pso. SC division:
+
+\[
+\frac{d\tilde{p}_{sc}}{dt} = \left [ \rho_{sc}\gamma_{1,h}\left ( 
+1-\frac{p_{sc} + \tilde{p}_{sc}}{\lambda p_{sc}^{max}} \right ) - 
+p_{sc} k_{1s,h} - \tilde{\beta}_1 \right ] \tilde{p}_{sc} 
+- f(\tilde{p}_{sc}) + \tilde{k}_{-1}\tilde{p}_{ta}
+\]
+where 
+\[
+f(\tilde{p}_{sc}) = \frac{K_p \tilde{p}_{sc}^2}{K_a^2 + \tilde{p}_{sc}^2}
+\]
+
+This term is intended to describe the action of cytotoxic immune cells in prepressing the division of psoriatic stem cells. It is extermely important - without it the system seems not to display bistability (fig. \ref{fig:noimmkilling}). See also Zhang fig. 6 and fig 7 in appendix A, and sections \ref{sec:zsc_scd} and \ref{sec:zfitting}) below.
+
+\begin{figure}[h!]
+%  \begin{subfigure}{.5\textwidth}
+%    \centering
+    \includegraphics[width=0.5\linewidth]{\zhangmatlab/expts/immune_kill/fig6a-nosub.png}
+% opt caption (for A,B etc) and label 
+%  \end{subfigure}
+  \caption{Immune killing switched off}
+  \label{fig:noimmkilling}
+\end{figure}
+
+
+
+Investigate effect of varying number of treatments/ 
+Without events (no treatments):  
+
+\begin{quote}
+TODO
+\end{quote}
+
+
+
+\subsection{Transition from Normal to Psoriatic and Psoriatic to Normal}
+
+Allow simulation to equilibrate (in the normal state) then switch some
+number of SC from normal to psoriatic at t=5000 days (fig \ref{fig:normpsoswitch}).  It is apparent that, at least in this scenario (when TA cells are also at equilibrium) the change to psoriasis happens when 1/2 of the equilibrium number of SC are changed. 
+
+% see also http://tex.stackexchange.com/questions/35240/special-arrangement-of-subfigures for arrangement of subfigures 
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/normal_to_psoriatic_230316/norm_appr_to_eq.png}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/normal_to_psoriatic_230316/pso_appr_to_eq.png}
+% opt caption (for A,B etc) and label 
+    \caption{a}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{\zhangsbml/mar16/normal_to_psoriatic_230316/norm_psoriatic_sc_gg.png}
+    \caption{b}
+  \end{subfigure}
+  \caption{(a): Approach to equilibrium of all cell types in the normal state (initially SC=20, other cell types=0) and psoriatic state (initially SC\_d=200, other cell types=0). (b): Effect on normal (SC) and psoriatic (SC$_d$) cells of changing a number nswitch of them to psoriatic at time $t=5000$}
+  \label{fig:normpsoswitch}
+\end{figure}
+
+
+
+\subsection{Zhang Treatment Scenario}\label{sec:ztreatment}
+
+Unsatisfactory aspects of treatment scenario -- thinning of epidermis and slow recovery
+
+We attempt to resolve this by performing sensitivity analysis and parameter fitting  with Copasi \cite{hoops2006copasi,mendes2009computational}. 
+
+
+\subsection{Sensitive Parameters}\label{sec:zparamsensit}
+
+Sensitive parameters: for fitting, it will be desirable to focus on those
+parameters whose variation have the greatest effect on the observables 
+(instantanous cell numbers) of the model. Parameter sensitivity of observable $O_i$ to parameter $p_j$ is defined as 
+\[
+S_{ij} = \frac{d \ln(O_i)}{d \ln(p_j)}
+\]
+% high sensit param-obs combinations are in treatment_230316/d180/sensit_scaled_highsens_op.txt, etc, made by sensit_ana1.R
+
+% see update  06may16 
+
+We have looked at both parameter--observable combinations and just the parameters that lead to the highest sensitivity (``sensitive paramters''). This has been done at times 1,30,60 and 180 days after the onset of treatment. Graphs are shown of the 180 day data in fig. \ref{fig:param_sensit_day180}, showing Parameter-observable combinations and a histogram of parameter sensitivities. The figure also shows that the sensitive parameters change very little with time. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/d180/sensit_scaled.png}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/d180/sensit_scaled_hist.png}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/d1_d30_d180_overlap_venn.png}
+  \end{subfigure}
+  \caption{Sensitivities of Parameter-observable combinations at day 180, and histogram of parameter sensitivities. Overlaps and differences of sensitive parameters between days 1,30 and 180.}
+  \label{fig:param_sensit_day180}
+\end{figure}
+
+
+also tables from day 180 %  sensit_scaled_highsens_para.txt, sensit_scaled_highsens_op.txt
+
+
+\subsection{Interaction of SC and SC\_d}\label{sec:zsc_scd}
+
+See the expressions in appendix A - expressing the interaction of 
+normal (y) and psoriatic (x) stem cells. Scaling is performed to leave 
+a nonparametric expression for immune killing, then examine how the the other expressions  for production and loss rates of psoriatic SC 
+(ignoring backconversion of TA to SC) intersect with this at equilibrium
+(figure \ref{fig:ratebal_sc_scd}). 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_Ka.png}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_Kp.png}
+    \caption{parameters $K_a$ and $K_p$}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_gamma1_h.png}
+% opt caption (for A,B etc) and label 
+    \includegraphics[width=.5\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_k1s_h.png}
+    \caption{parameters $\gamma_{1,h}$ and $k_{1s,h}$}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.3\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_lambda.png}
+% opt caption (for A,B etc) and label 
+    \includegraphics[width=.3\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_scmax.png}
+    \includegraphics[width=.3\linewidth]{\zhangsbml/fitting_jul16/ratebalance/scan_rhosc.png}
+    \caption{parameters $\lambda$,$SC_{max}$ and $\rho_{sc}$}
+  \end{subfigure}
+  \caption{parameter scanning for rate balance between processes removing psoratic stem cells by immune killing and other processes producing them (by self proliferation) and removing them. $x=SC_d/K_a$ where $K_a=19$}
+  \label{fig:ratebal_sc_scd}
+\end{figure}
+
+    
+
+% fitting_jul16/ratebalance/fig7a.R 
+
+
+\subsection{Fitting}\label{sec:zfitting}
+
+The Target function made by scripts subset\_t20k.R and interp\_t20k.v2.R. 
+
+
+\begin{description}
+\item Downsample the number of points in the later half of the trajectory. 
+\item Remove the part around the minimum, 
+\item subtract (t0-delta), the start of the treatment time,
+\item log transform, do a spline fit to this (log-time-transformed), 
+\item add back t0-delta 
+\end{description}
+
+(it is not possible to fit to an offset time interval within copasi, 
+as I originally hoped, by using the suppress-output-before in timecourse). 
+
+\subsubsection{fitting: First attempt}
+
+concentrating on most sensitive SC and TA parameters
+$\gamma_{1,h}, \gamma_{2}, \lambda, k_{1as}, \rho_{sc}$. Method: Levenberg-Marquart. See figure \ref{fig:fit_try1}. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/fit_try1/prog_fit.png}
+% opt caption (for A,B etc) and label 
+    \caption{A}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/fit_try1/param_est.png}
+    \caption{B}
+  \end{subfigure}
+  \caption{Decrease of cost function and total cell number (simulation, target function and difference) when fitting $\gamma_{1,h}, \gamma_{2}, \lambda, k_{1as}, \rho_{sc}$.}
+  \label{fig:fit_try1}
+\end{figure}
+
+This seems very unsatisfactory. 
+
+\subsubsection{fitting: Second attempt}
+ concentrating on sensitive parameters affecting differentiating cell types GA, SP, GC and CC. 
+$k_{2as},k_{2s},k_{3},k_{4}, k_{5}$. Method: Levenberg-Marquart. See figure \ref{fig:fit_try2}. 
+Tried Levenberg-Marquart, Hooke and Jeeves, Genetic Algorithm and Evolutionary programming. The cost function is most reduced by HJ and LM, and they are faster. LM seems the best. 
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/fit_try2/prog_fit.png}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/fit_try2/fitted.png}
+    \caption{progress of fit}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/fit_try2/t20_after/t20k_fig6a_cellsum.png}
+% opt caption (for A,B etc) and label 
+    \includegraphics[width=.5\linewidth]{\zhangsbml/mar16/treatment_230316/fit_try2/t20_after/t20k_fig6a.png}
+    \caption{behaviour after fitting}
+  \end{subfigure}
+
+  \caption{Progress of fit: Decrease of cost function and total cell number (simulation, target function and difference) when fitting parameters $k_{2as},k_{2s},k_{3},k_{4}$ and $k_{5}$. Total cell numbers and numbers of subtypes after fitting.}
+  \label{fig:fit_try2}
+\end{figure}
+
+This is clearly an improvement (a,b,c) but the fitted cell numbers (d) show that there has been an unphysiological move towards GA and GC cells, while CC cells are almost entirely lost. 
+
+
+The cell type ratios are much distorted during resolution (N.J.R.) 
+
+\subsubsection{fitting: Third attempt}
+
+Rate balance analysis suggests need to include 
+\begin{description} 
+\item $K_a$ (between 10 -- 40)
+\item $K_p$ (0.1 -- 0.6)
+\item $\gamma_{1,h}$ (0.0025 -- 0.0045)
+\item $k_{1s,h}$ (0 -- 0.002)
+\item $\lambda$ ( $>$ 2.5)
+\item scmax ($>$ 150)
+\item $\rho_{sc}$ (3 -- 7) as empirical studies had shown (figs \ref{fig:rho2}) and  \ref{fig:rho7}). 
+\end{description}
+(in fact as Zhang appendix shows, $\rho_{sc}/(K_p/K_a)$ should be in 159 -- 440 -
+so both $K_p$ and $K_a$ could be a lot larger. It may be best not to restrict the ranges of inidividual parameters so much as the above implies.) \\
+Figure ... 
+
+
+
+
+\subsection{Interaction of Normal TA and SC Cells}\label{sec:intTASC}
+
+This is rather complex and is not a convincing aspect of the Zhang paper
+; nevertheless this inteaction exists and is an interesting aspect of 
+psoriasis.
+
+
+In the Zhang model,  TA cells may negatively regulate (normal) SC cells 
+
+in the self-proliferation term 
+\[
+d(SC)/dt = \gamma_1 SC (1-SC/SC_{max})
+\]
+$\gamma_1$ is not a constant but given by 
+\[
+\gamma_1 = \gamma_{1,h} \frac{\omega}{1+(\omega-1)(TA/TA_h)^n}
+\]
+where $\omega=100$,$n=3$ and $TA_h=560.95$ ($TA_h$ is not given directly in the original Zhang model but is calculated in terms of other kinetic constants by somewhat complex expressions given in section 3.1). This effectively means that 
+SC proliferation increases 100 fold once TA numbers decrease below 560. 
+As this affects only ``normal'' SC, not psoriatic, this (along with immune killing) may be important to enabling the normal SC to outcompete psoriatic again.
+
+The same scaling factor affects $k_{1s}$ and $k_{1as}$ for symmetric and asymmetric division of SC into 2 TA or TA+SC. 
+
+The way this TA regulation of SC has been implemented is questionable. The reference given is to \cite{hsu2014transit}; however this work (on mouse hair follicle cells) in fact seems to show that TA cells {\em stimulate} SC division. 
+
+The other parameter in this equation, $\omega$, describing a speeding-up of division, has physiologicl relevance: stem cells in normal tissue divide only slowly , but if e.g. the epidermis is broken division accelerates markedly to heal the wound. (This is probably the motivation for the choice of the way TA regulates SC; the TA numbers are more serving as a proxy for total cell number. However it seems that what really happens here may be a change in prolifteration from SC $\rightarrow$ 2SC to SC $\rightarrow$ SC + TA and SC $\rightarrow$ 2TA \cite{roshan2016human} (cf. \ref{chapter-philjones}). 
+
+Investigate effect of changing $ta\_h$ and $\omega$; (however does {\em not} have the effect I expected)
+
+(FIG HERE TO DO) 
+
+\section{Follow up (F{\'e}lix-Garza)}
+
+The Zhange model was used as the basis for a recent paper on the treatment of psoriasis by blue light irradiation \cite{garza2017dynamic}. This differs in several respects primarily related to treatment. It is noteworthy that the behavior in which the epidermis thins below physiological thickness, as seen during UVB treatment, is never entered, but conversely the treatment does not switch the model back from the psoriatic to normal state, so that after a period of remission psoriasis returns. This may be an accurate description of the milder nature of treatment with blue light. 
+
+\chapter{Simplified Sophie Weatherhead-like DE model}
+
+Sophie Weatherhead's Netlogo model \cite{weatherhead2011keratinocyte} reproduced many of the features of psoriasis in a simple form (3 cell types only). We decided to attempt to replicate the behaviour of this model within the more abstract ODE framework. 
+
+\section{Contents of Sophie Weatherhead's Paper and Thesis}
+
+The paper (\cite{weatherhead2011keratinocyte}) shows that apoptosis of SC and TA cells is sufficient to explain the clearance of psoriatic plaques by UVB radiation. It also investigates the difference between 311 and 290 nm UVB.
+
+Figure 1 shows significant apoptosis following {\em in vivo} irradiation of plaques with 311 nm UVB (but not 290nm). Fig. 1c is a timecourse showing a peak of apoptois at 16-24h after irradiation. Figure 2 attempts to show co-localisation of apoptotic cell markers with markers of keratinocytes, T cells, Langerhans cells, melanocytes and monocytes/macrophages. This appears to show that nearly all apoptotic cells are keratinocytes (though what is the colocalization coefficient?). Figure 3 shows the effects of UVB on primary keratinocyte cultures (i.e. {\em in vitro}). In culture, both 290 and 311 nm induce apoptosis; the time courses are similar, but slightly faster for 311 nm, although plateauing at a lower fraction of apoptotic cells. 
+
+Figures 4 and 5 describe the development and behaviour of the agent-based mathematical (netlogo) model. The model contains SC, TA and differentiating (D) cells. The corneocyte cell layer is not explicitly represented. The rete ridges also have dynamics, and lengthen realistically as the epidermis thickens. In fig 4, The effects of the relative proporition of TA cells dividing, and the SC and TA cell cycle length were investigated. In fig. 5, the reversion of the epidermis from normal to psoriatic by UV-induced apoptosis (7 doses over about 21 days) is investigated. This is discussed in more detail below.  Remaining  questions include the effect of symmetric and asymmetric SC division; currently asymmetric division to 2 TA cells is not allowed. 
+
+The thesis is a very substantial document (262 pps; 346 pps including appendices). The mathematical modelling is however confined largely to chapter 6 (pps 151-176). Measurements of the effects of irradiation on keratinocytes are described in chapters 3 (in vivo) and 5 (in culture). Compared to the paper it contains additional material on the effect of the length of SC and TA cell cycle and the frraction of cycling cells, on the effect of UV treatment on SC, TA or Differentiated cells, and of the effect of having UV induce cell cycle arrest rather than apoptosis.  
+
+The netlogo code is provided in the appendices. However, my attempt to load and run it has been unsuccessful. This may be the result of converting the pdf to text, which required reformating the resulting text, but I am not familiar with the netlogo language and so have been unable to confirm that. 
+
+\subsection{Reversion of Psoriatic to Normal by UV Treatment in the Netlogo ABM}
+
+In figure 5 of (\cite{weatherhead2011keratinocyte}, it is shown that 3 MED UV treatment reverts the epidermis from psoriatic to normal, and that a time course more closely corresponding to experiment is obtained by including apoptosis alone than apoptosis and arrest. When apoptosis is induced, the stem and tranit amplifying (TA) cell numbers fall but differentiating (D) cell numbers initially increase ; hence the thinning of the epidermis is not immediate but becomes apparent only after about half the treatment period (about 10 days). I was not able by reading the netlogo code to understand how this comes about, so the video of the resolution process
+{\tt http://research.ncl.ac.uk/psoriasis/} was studied in frame-by-frame
+detail:
+
+The first irradiation is at frame scene01100.png ; the cell number 
+really falls at scene01114.png but the number of D cells remains roughly constant
+as losses to apoptosis seem to be compensated by extra divisions of TA cells,
+apparently into the gaps produced by apoptosis of other TA cells (ie suggesting
+local relief of contact inhibition). The epidermis-corneocyte boundary becomes wavelike as the remaining cells pack down into the invaginations between rete ridges. The boundary between TA ands differentiated cells also ends up extending deeper into these invaginations, which may provide a greater surface area for TA to D transitions. The D cell number then starts to increase slightly at scene01142.png, as the epidermis-corneocyte boundary flattens out again,  and  this continues to the start of the second irradiation at scene01156.png. The cell number again starts to fall at 01168 and recovers later in the same way. The third irradiation at  scene01214.png and fourth irradiation at  scene01270.png are also similar, with the boundary between TA and D extending slightly deeper again. The crucial change when D cell number starts to decrease seems to be 
+the shortening of the rete ridges start at 01326 (the start of fifth irradiation) ("positions" 7 $\rightarrow$ 5). (See figure \ref{fig:sophie_abm_snapshots}.)
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophienlgo/vlc_frames/scene01114.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophienlgo/vlc_frames/scene01124.png}}  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \centering
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophienlgo/vlc_frames/scene01156.png}}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophienlgo/vlc_frames/scene01324.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophienlgo/vlc_frames/scene01326.png}}
+  \end{subfigure}
+  \caption{Treatment of NetLogo ABM with 3 MED UV. (A) Just after start of first irradiation (frame=1114,t=2314). (B) further into first irradiation (frame=1124,t=2324),
+(C) End of first irradiation (frame=1156,t=2356),
+(D) End of fourth irradiation (frame=1324,t=2524)
+(E) Start of fifth irradiation (immediately after (D))  (frame=1326,t=2526). 
+Total cell number does not start to decline until differentiated cell number starts to decline at (E), when the rete ridges begin to shorten.}
+  \label{fig:sophie_abm_snapshots}
+\end{figure}
+
+
+
+
+\section{Initial Work}\label{sec:SWinitial}
+
+It was decided to attempt to reproduce the desirable features of the Weatherhead agent-based model with a differential-equation based model that could be simulated in Copasi, without having to have explicitly different normal and psoriatic lineages as in the Zhang model. It should have the following features:
+
+\begin{description}
+\item Should exhibit two stable steady states, ``normal'' and ``psoriatic'', with psoriatic having a higher cell number.
+\item A treatment inducing a transient increase in proliferation should mediate the transition between the normal and psoriatic. 
+\item a transient increase in apoptosis should be able to reduce the psoriatic state back to the normal. 
+\item The turnover time should be shorter in the psoriatic state.
+\end {description}
+
+it was decided to have SC and TA cells and a single D (differentiating/differentiated) type, rather than explicit GA, SP, GC and CC cell types.
+
+It would be necessary to have, in the psoriatic state, a stimulation resulting from the higher number of cells that would maintain it. It was decided to do this via a species (``IL'') representing a cytokine, that would be secreted by the TA cells and and stimulate SC and TA division. This could also represent the an external cytokine stimulus (as from immune activation by an illness) driving the transition into the Psoriatic state. Hence the wiring diagram for the system was designed to be as in figure \ref{fig:sophie_wiring}.
+
+% This may be in H:\ngrs2\documents\PSORT_ncl_mar16\ <- NO, I think these don't have the kinetic labels on the arrows.
+% note also unfinished in Dropbox:PSORT/psor_v5_wiring.pptx
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.75\linewidth]{figs/wiring_from_jun13.png}
+  \end{subfigure}
+  \caption{Wiring diagram for reactions included in ``Weatherhead-like'' psoriasis model.}
+  \label{fig:sophie_wiring}
+\end{figure}
+
+
+\subsection{Rate-balance plots}
+\subsection{Basics}
+\subsection{Cytokine-Induced Psoriasis}
+\subsection{Treatment}
+
+\subsection{Rate-balance plots}
+
+At first exponential kinetics was used for SC and TA cell growth, but this is unstable. Then this was changed to a logistic-type growth equation leading to the following stable states: 
+
+\subsection{Basics}
+
+The model is able to equilibrate to a normal or psoriatic-like state: see figure \ref{fig:firstsophie_basics}
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/first_go_TA_based/v4_basics/v4_eqfromTA0.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/first_go_TA_based/v4_basics/v4_eqfromTA400.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/first_go_TA_based/v4_basics/v4_eqfromTA900.png}
+  \end{subfigure}
+  \caption{Equilibration to the normal state (from initial value SC=10, other cell types=0), and to the psoriatic state from below (initial SC=10, TA=400, D=0) and above (initial SC=10, TA=900, D=0).}
+  \label{fig:firstsophie_basics}
+\end{figure}
+
+\subsection{Cytokine-Induced Psoriasis}
+
+Equilibrate for 600 days then increase external cytokine to 3000 for 30 days, figure \ref{fig:firstsophie_cytostim}. 
+This moves the model from the normal into the psoriatic state, but the timescale is rather too to be realistic. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.7\linewidth]{\sophiesbml/first_go_TA_based/v4_cyto_induced/v4_t1500.png}
+  \end{subfigure}
+  \caption{Cytokine stimulation on normal skin; 30 day stimulation transitions to psoriasis.}
+  \label{fig:firstsophie_cytostim}
+\end{figure}
+
+
+\subsection{Treatment}
+
+Induce psoriasis as above (at 600 days) then (at 1500 days) treat 7 times with UV, increasing apoptosis rates by 5000-fold over a 48-hour period, such that a fraction 0.15 of cells die on each treatment (figure \ref{fig:firstsophie_treatment}). 
+This reverts the epidermis  to the normal state, though the reversion of total cells is quite slow due to slow dynamics of D cells, taking over 100 dauys before epidermis is within 90 of its final thickness. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.7\linewidth]{\sophiesbml/first_go_TA_based/v4_treatment/v4_t2k.png}
+  \end{subfigure}
+  \caption{Induction of psoriasis at 600 days (black bar), followed by Treatment at 1500 days (green bar) consisting of  7 UVB-induced increase of apoptosis rates by 5000-fold over a 48-hour period, followed by 8h recovery.}
+  \label{fig:firstsophie_treatment}
+\end{figure}
+
+
+\section{First Working Version (GSK May 2016)}\label{sec:SWmay16}
+
+%update  06may16 
+
+% update 23may16 has the behaviour of tau as through the resolution: not reduced in the pso model.
+
+This is what was presented at the meeting at GSK Stevenage. 
+While turnover time is only very slightly reduced in the psoriatic state,
+it still exhibits the bistability nicely. 
+
+\subsection{Rate-balance plots}
+
+The model behaviour is driven by the sigmoidal TA response to the IL species. 
+Desquamation has conventional mass-action kinetics: rate$(D\rightarrow\varnothing) \sim D$. The model was designed with rate-balance plots, where rates of production and loss are shown as a function of cell number (figure \ref{fig:secondratebalance}). Lower and higher cell
+number states will be produced where the production and loss rate curves cross
+(in such a way that small perturbations will tend to shrink again 
+rather than be amplified). 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/second_go_SC_and_TA/SC_rate_contributions.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/second_go_SC_and_TA/TA_rate_contributions.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/second_go_SC_and_TA/D_loss_rate.png}
+  \end{subfigure}
+  \caption{Rate-balance plots for SC, TA and D cell types.}
+  \label{fig:secondratebalance}
+\end{figure}
+
+\subsection{Basics}
+
+The model is able to equilibrate to a normal or psoriatic-like state: see figure \ref{fig:secondsophie_basics}
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_basics/v5_eqfromSC2.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_basics/v5_eqfromSC20TA600.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_basics/v5_eqfromSC50TA2000.png}
+  \end{subfigure}
+  \caption{Equilibration to the normal state (from initial value SC=2, other cell types=0), and to the psoriatic state from below (initial SC=20, TA=600, D=0) and above (initial SC=50, TA=2000, D=0).}
+  \label{fig:secondsophie_basics}
+\end{figure}
+
+
+\subsection{Cytokine induced psoriasis}
+
+Equilibrate for 150 days then increase external cytokine to 2000 for (n1) or 4 days, figure \ref{fig:secondsophie_cytostim}
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_cyto_induced/v5_t200_lowerstim.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_cyto_induced/v5_t200.png}
+  \end{subfigure}
+  \caption{Cytokine stimulation on normal skin; (n1?) day stimulation at rate 2000/day returns to normal, 4 day stimulation transitions to psoriasis.}
+  \label{fig:secondsophie_cytostim}
+\end{figure}
+
+\subsection{Treatment}
+
+Induce psoriasis as above then treat with UV, increasing apoptosis rates by 1250-fold over a 48-hour period, such that a fraction 0.15 of cells die on each treatment (figure \ref{fig:secondsophie_treatment}). However, note that the turnover time $\tau$ is not reduced in the psoriatic state.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_treatment/v5_treatment_t300.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_treatment/v5_treatment_t300_detail.png}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/second_go_SC_and_TA/v5_treatment/v5_tau.png}
+  \end{subfigure}
+  \caption{Treatment by UVB-induced increase of apoptosis rates by 1250-fold over a 48-hour period, followed by 8h recovery. Left: cell numbers during whole timecourse; right: detail of times around treatment. Bottom: epithelial turnover time $\tau$ during timecourse}
+  \label{fig:secondsophie_treatment}
+\end{figure}
+
+
+
+
+\section{Update (June-July 2016)}\label{sec:SWjun16}
+
+
+We have sought to reduce the turnover time by giving the dependence of the desquamation rate D a super-linear dependence on differentiated cell number D:
+ rate$(D\rightarrow\varnothing) \sim D^2$.  
+This appears realistic as a high level of skin scaling is a feature of psoriasis, and it seems plausible that the outer layers of the epidermis might become more mechanically unstable in its thickened psoriatic state. Moreover, when a force is applied to the end of a beam (corresponding to a tangential force at the surface of the epidermis), the moment of the force is greatest at the basal lamina ($M = -F x$ where $x$ is the thickness) 
+\footnote{see for example {\tt http://www.codecogs.com/library/engineering/materials/shear-force-and-bending-moment.php}, visualizing stress and strain, Reish and Girty {\tt http://www.geology.sdsu.edu/visualstructure/vss/htm\_hlp/index.htm}, and Passive earth pressure {\tt http://www.brighthubengineering.com/geotechnical-engineering/106547-the-coefficient-of-passive-lateral-earth-pressure/}}
+
+To put this in slightly more rigorous form, 
+consider a coordinate $x$ perpendicular to the skin surface running from 0 at the surface to $h$ at the bottom 
+of the corneocyte layer (so that $D=hN_A$ where there are $N_A$ cells per unit area). Then the average rate of loss is 
+\[ 
+\frac { \int_0^h x P(x,h)\,dx} { \int_0^h P(x,h)\,dx}
+\]
+where $P(x,h)$ is the probability of desquamation of a plaque of thickness $x$ ($P$ is not necessarily normalized in the equation above, the expression in the denominator handles this). It is apparent that for any polynomial form of $P \sim x^n$ with $n\geq 0$ the 
+result is that the loss rate $\sim \frac{n+1}{n+2} h$, however as $h$ increases it seems likely that $P$ will become more strongly curved upwards, so $n$ is an increasing function of $h$ and resulting in a supra-linear dependence of the loss rate on $h$. (This does not take into account any changes in the cell-cell cohesive force through the corneocyte layer, which may also have an effect). 
+
+The equilibrium cell numbers in the pso. model are in only qualitative agreement with experiment. 
+
+
+\subsection{Rate-balance plots}
+
+See figure   \ref{fig:thirdsophie_ratebalance}.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/third_go_SC_and_TA/SC_rate_contributions.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/third_go_SC_and_TA/TA_rate_contributions.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/third_go_SC_and_TA/D_rate_contributions.png}
+  \end{subfigure}
+  \caption{Rate-balance plots for SC, TA and D cell types}
+  \label{fig:thirdsophie_ratebalance}
+\end{figure}
+
+
+\subsection{Basics}
+To check that bistability is maintained, figure \ref{fig:thirdsophie_basics}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{\sophiesbml/third_go_SC_and_TA/v5_basics/v5_eq_traj.png}
+  \caption{Equilibration to normal/psoriatic states from differing initial cell numbers}
+  \label{fig:thirdsophie_basics}
+\end{figure}
+
+\subsection{Cytokine Induced}
+
+Equilibrate for 100 days then increase external cytokine to 1500 for 1 or 4 days, figure \ref{fig:thirdsophie_cytostim} (with this model and this level of cytoline, 2 d is enough to induce Psoriasis). 
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third_go_SC_and_TA/v5_cyto_induced/v5_t200_1d_k4x1500.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third_go_SC_and_TA/v5_cyto_induced/v5_t200_4d_k4x1500.png}
+  \end{subfigure}
+  \caption{Cytokine stimulation on normal skin; 1 day stimulation at rate 1500/day returns to normal, 4 day stimulation transitions to psoriasis.}
+  \label{fig:thirdsophie_cytostim}
+\end{figure}
+
+
+
+\subsection{Treatment}
+
+Induce psoriasis as above then treat with UV, increasing apoptosis: figure \ref{fig:thirdsophie_treatment}. 
+
+The turnover time is now less in the Psoriatic state but is still to high; about 20 days rather than 10.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third_go_SC_and_TA/v5_treatment/v5_treatment_t300.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third_go_SC_and_TA/v5_treatment/v5_treatment_t300_detail.png}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third_go_SC_and_TA/v5_treatment/v5_tau.png}
+  \end{subfigure}
+  \caption{Treatment by UVB-induced increase of apoptosis rates by 1250-fold over a 48-hour period, followed by 8h recovery. Left: cell numbers during whole timecourse; right: detail of times around treatment. Bottom: epithelial turnover time $\tau$ during timecourse}
+  \label{fig:thirdsophie_treatment}
+\end{figure}
+
+
+
+%% section
+\section{Update (Aug 2016)} \label{sec:SWaug16}
+
+(From directory  - third.2\_go\_SC\_and\_TA) 
+
+
+Relative to previous, D cell numbers should be higher and turnover time in psoriatic state even faster. Hence increase $k2as$ (for differentiation to D) to 0.35/day.
+
+
+\subsection{Rate-balance plots}
+
+To increase D cell numbers, increase $k2as$ (for differentiation to D) to 0.35; also change $il0$ (IC50 for IL-induced TA proliferation) a little from 700 to 800, Also increase coefficient of $D^2$ in desquamation equation: figure   \ref{fig:thirdpointtworatebalance}.
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/third.2_go_SC_and_TA/SC_rate_contributions.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/third.2_go_SC_and_TA/TA_rate_contributions.png}
+    \includegraphics[width=.31\linewidth]{\sophiesbml/third.2_go_SC_and_TA/D_rate_contributions.png}
+  \end{subfigure}
+  \caption{Rate-balance plots for SC, TA and D cell types}
+  \label{fig:thirdpointtworatebalance}
+\end{figure}
+
+
+
+\subsection{Basics}
+To check that the model exhibits bistability: figure \ref{fig:thirdpointtwosophie_basics}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_basics/v5_eq_traj.png}
+  \caption{Equilibration to normal/psoriatic states from differing initial cell numbers}
+  \label{fig:thirdpointtwosophie_basics}
+\end{figure}
+
+
+
+
+
+\subsection{Cytokine Induced}
+
+Equilibrate for 150 days then increase external cytokine to 3000 for 2 or 4 days, figure \ref{fig:thirdpointtwosophie_cytostim}
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_cyto_induced/v5_t300_2d_k4x3000.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_cyto_induced/v5_t300_4d_k4x3000.png}
+  \end{subfigure}
+  \caption{Cytokine stimulation on normal skin; 2 day stimulation at rate 3000/day returns to normal, 4 day stimulation transitions to psoriasis.}
+  \label{fig:thirdpointtwosophie_cytostim}
+\end{figure}
+
+
+
+
+\subsection{Treatment}
+
+Induce psoriasis as above then treat with UV, increasing apoptosis
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_treatment/v5_treatment_t450.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_treatment/v5_treatment_t450_detail.png}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_treatment/v5_tau.png}
+  \end{subfigure}
+  \caption{Treatment by UVB-induced increase of apoptosis rates by 1250-fold over a 48-hour period, followed by 8h recovery. Left: cell numbers during whole timecourse; right: detail of times around treatment. Bottom: epithelial turnover time $\tau$ during timecourse}
+  \label{fig:thirdpointtwosophie_treatment}
+\end{figure}
+
+
+\subsection{Sensitivity Analysis}
+
+Steady State analysis. 
+
+Scaling fails, perhaps becuase of the non-linearity? but a scaled form can be calculated. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_sensit/psor_v5_sensit_unsc.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_sensit/psor_v5_sensit_unsc_log.png}
+  \end{subfigure}
+  \caption{Sensitivites (unscaled), raw values and $|log(sensitivity)|$}
+  \label{fig:thirdpointtwosophie_sensit_unsc}
+\end{figure}
+
+
+Much the most sensitive parameter is alphaq, the coefficient of $D^2$ in the expression for desquamation rate.
+
+
+
+%% section
+\section{Update (Sept 2016-Jan 2017) - add GF} \label{sec:SWsep16}
+
+(From directory  - third.3\_go\_SC\_and\_TA) 
+
+To make the model more realistic, the single growth-stimulating species IL should be changed to two species, IL and GF (Growth Factor), the first representing growth-stimulating interleukins released by immune cells (that are the triggering event) and the second representing the autocrine response of the keratinocytes (fig. \ref{fig:sophie_3_3_wiring}).
+
+\begin{figure}[h!]
+    \centering  
+  \begin{subfigure}{.65\textwidth}
+    \includegraphics[width=\linewidth]{figs/wiring_diag_v3_3_update_30oct.png}
+  \end{subfigure}
+  \caption{Wiring Diagram for Weatherhead-like model including both GF and IL as stimulants of growth}
+  \label{fig:sophie_3_3_wiring}
+\end{figure}
+
+
+There is a choice to be made here, whether the growth-stimulating equations are to have the form
+\[
+\frac{dTA}{dt} \sim \gamma_{2s}  \left( (IL/il0)^n / (1+(IL/il0)^n )) + (GF/il0)^n / (1+(GF/il0)^n )\right)
+\]
+
+or
+\[
+\frac{dTA}{dt} \sim \gamma_{2s}  \left( ((IL+GF)/il0)^n / (1+((IL+GF)/il0)^n )) \right)
+\]
+where the first equation describes a situation where the two molecules act in different but additive ways (on different receptors and via different downstream pathways)
+and the second where the two molecules are interchangeable. The two forms are distinct if the Hill coefficient $n > 1$, and $n=6$ in the Weatherhead-like model. The biological reality is likely to lie between the two (different receptors, but some overlap in downstream pathways) so the second has been chosen as requiring less alteration to the model. 
+
+\subsection{Rate-balance plots}
+
+This is very similar to section \ref{sec:SWaug16}. 
+
+\subsection{Basics}
+To check that the model exhibits bistability: figure \ref{fig:thirdpoint3sophie_basics}
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}{\textwidth}
+    \includegraphics[width=.8\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_basics/v5_eq_traj.png}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_treatment/v5_normal_bar.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_treatment/v5_psoriatic_bar.png}
+    \end{subfigure}
+
+  \caption{Upper: equilibration to normal/psoriatic states from differing initial cell numbers. Lower: Cell numbers in normal and psoriatic states compared to experiment (data from \cite{zhang2015modelling})}
+  \label{fig:thirdpoint3sophie_basics}
+\end{figure}
+
+
+
+
+\subsection{Cytokine Induced}
+
+Equilibrate for 150 days then increase external cytokine to 3000 for 2 or 4 days, figure \ref{fig:thirdpoint3sophie_cytostim}
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_cyto_induced/v5_t300_2d_k4x3000.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_cyto_induced/v5_t300_4d_k4x3000.png}
+  \end{subfigure}
+  \caption{Cytokine stimulation on normal skin; 2 day stimulation at rate 3000/day returns to normal, 4 day stimulation transitions to psoriasis.}
+  \label{fig:thirdpoint3sophie_cytostim}
+\end{figure}
+
+
+
+
+\subsection{Treatment}
+
+Induce psoriasis as above then treat with seven UV treatments, 
+increasing apoptosis; figure \ref{fig:thirdpoint3sophie_treatment}.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_treatment/v5_treatment_t450.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_treatment/v5_treatment_t450_detail.png}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_treatment/v5_tau.png}
+  \end{subfigure}
+  \caption{Treatment by UVB-induced increase of apoptosis rates by 1250-fold over a 48-hour period, followed by 8h recovery. Left: cell numbers during whole timecourse; right: detail of times around treatment. Bottom: epithelial turnover time $\tau$ during timecourse}
+  \label{fig:thirdpoint3sophie_treatment}
+\end{figure}
+
+
+\subsection{Sensitivity Analysis}
+
+Scaling fails for the Steady State analysis,  perhaps because of the 
+several rules and events in the model. However scaled sensitivities
+can be calculated for the timecourse analysis (figure \ref{fig:thirdpoint3sophie_sensit}), except for the IL species for which there seem to be convergence problems. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_sensit_2/psor_v5_sensit_normal_scaled.png}
+    \includegraphics[width=.5\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_sensit_2/psor_v5_sensit_pso_scaled.png}
+  \end{subfigure}
+  \caption{Scaled sensitivites, (left) in normal state and (right) psoriatic }
+  \label{fig:thirdpoint3sophie_sensit}
+\end{figure}
+
+
+In the normal state the most sensitive parameters are k1as, maxsc, k2as, k4s, k4d and alphaq, the coefficient of $D^2$ in the expression for desquamation rate. In the psoriatic state this changes.
+
+
+\subsection{Induction: Duration and Strength of Cytokine Stimulus}
+
+(directory v5\_cyto\_multiinduce)
+
+How does the length and strength of the psoriasis-inducing cytokine stimulus affect whether the psoriatic state is induced in the model? 
+To investigate this the duration of the cytokine simulus was scanned from 0.5 to 10 days in intervals of 0.5 day, while the strength of the stimulus (k4ext in figure \ref{fig:sophie_3_3_wiring} (equation ??? when you add it)) was varied from 500 to 10000 units. The kinetics of cellular response to the cytokine and of cytokine removal (k4d = 8.0/day, corresponding to a half-life of just over 2 hours) were not altered. It is apparent that there is a lower concentation of cytokine addition that does not induce psoriasis no matter how prolonged; however a sufficiently strong stimulus can induce psoriasis even if very brief.
+
+The result is shown in figure \ref{fig:thirdpoint3sophie_scan_induce}.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[width=.9\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_cyto_multiinduce/final_cell_number_vs_treat.png}
+  \end{subfigure}
+  \caption{Dependence of the final state of the epidermis on the duration (12 h to 10 day) and strength (500 to 10000) of cytokine stimulus}
+  \label{fig:thirdpoint3sophie_scan_induce}
+\end{figure}
+
+
+
+\subsection{Treatment: Number and Intensity of Treatments}
+
+(directory v5\_multitreat)
+
+It is desired to examine how the number and strength (increase of max.
+apoptosis rate) of treatments affect the number of treatments required to resolve psoriasis.
+
+To recap, treatment is handled by scaling up the apoptosis rate 
+
+\[
+N = N_o \exp(-\beta * InA * N)
+\]
+for numbers of cells N={SC, TA}. 
+Because of the way SBML {\tt events} are encoded, the number of events can not
+be varied straightforwardly, but 
+it is possible to work around this by having a fixed number of treatments
+and setting 
+
+\[
+ InA = \left\{ \begin{array}{ll}
+1.0 + (InAmax-1.0)*F_h(t) &\mbox{during treatment}\\
+1.0 &\mbox{otherwise}
+\end{array} \right. 
+\]
+where 
+\[
+F_h=\exp(-(t-t_{cut})/\Delta t)/(1+\exp(-(t-t_{cut})/\Delta t))
+\]
+is a switching function, and $\Delta t=0.1$ day is small enough to switch the function during the resting period between treatments. Thus the strength of treatment $InA$ is $InA_{max}$ for treatments occuring at $t<t_{cut}$ and 1 (i.e. the normal background apoptosis rate) for those at $t>t_{cut}$, effectively cutting off the treatments for these values.  The magnitude of $InA_{max}$ itself, the maximum increase in apoptosis rate, can be scanned simply in Copasi. 
+
+The result is shown in figure \ref{fig:thirdpoint3sophie_scan_treat}.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[width=.9\linewidth]{\sophiesbml/third.3_go_SC_and_TA/v5_multitreat/final_cell_number_vs_treat.png}
+  \end{subfigure}
+  \caption{Dependence of the final state of the epidermis on the number (1 to 30) and effect strength (apoptosis rate $InA_{max}$ 125 to 2500 in steps of 125) of treatments}
+  \label{fig:thirdpoint3sophie_scan_treat}
+\end{figure}
+
+Hence it seems that, if the apoptotic response is not sufficiently strong, psoriasis will not be resolved by even a very large number of treatments. 
+
+The details of the response to this would also depeend on the details of how the apoptosis rate increase depends on the strength of IR; the two are currently rather unsatisfactorily combined into the single parameter $InA$ (or $InA_{max}$ in the implementation just described). Details of apoptosis kinetics in \cite{weatherhead2011keratinocyte} esp. figures 1 (in vivo) and 3 (in vitro, i.e. primary cell cultures) may provide further insight here. Also sophie weatherhead's thesis e.g. section 1.4 (introduction), section 3.3.4 (time course) - results are consistent with cells being removed on a timescale of a couple of h. Plots of data from individual patients are shown. Chapter 5 is live cell imaging in vitro.
+
+
+%% section
+\section{Update (Jan 2017+) - add Apoptotic Cells, Growth Arrested Cells, and Response to Biological Treatment} \label{sec:SWjan17}
+
+(From directory  - third.4\_go\_SC\_and\_TA) 
+(and  third.5\_go\_SC\_and\_TA) 
+
+To make the model more realistic, Species representing Apoptotic Cells (A), Growth Arrested Cells (R) and Biological Treatment (B) were added to the model. 
+
+The UV treatment regime, which had been matched to a 3 MED-like dose, was changed to a more realistic protocol starting with 0.7 MED and increasing
+as outlined in Kirke et al \cite{kirke2007randomized}. Treatments occur with 1- or 2-day gaps to get 3 per week. 
+
+As before the treatment protocol induces 
+increasing apoptosis; chosing number and intensity 
+so that apoptosis is just induced, the output is as  see figure \ref{fig:thirdpoint4sophie_treatment}. (this is subdir v5\_treatment2; the original 7-treatment was also done in v5\_treatment, and is shown in subfigures for comparison.)
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment2/v5_treatment_t450.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment2/v5_tau.png}}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment/v5_treatment_t450_detail.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment2/v5_treatment_t450_detail.png}}
+  \end{subfigure}
+  \caption{Treatment by UVB-induced increase of apoptosis rates by Kirke protocol of increasing dose, with 3 treaments/week. A: cell numbers during whole timecourse; B: epithelial turnover time $\tau$ during timecourse; C and D: detail of times around treatment, with C: old protocol of constant treatment strength (induction of apotosis) and D: Kirke protocol of increasing induction of apotosis.}
+  \label{fig:thirdpoint4sophie_treatment}
+\end{figure}
+
+
+
+\subsection{Apoptotic Cells}
+
+The model wiring diagram was altered so that cells undergoing apoptosis go through a brief period as explicit A cells before disappearing. The results are shown in figure   \ref{fig:thirdpoint4sophie_treatment_apo}. With the original protocol of constant treatment strength the cell numbers dying decrease during treatment; with the protocol of increasing treatment strength, they increase. 
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment/v5_apo.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment2/v5_apo.png}}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment/v5_apo_per1000.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\sophiesbml/third.4_go_SC_and_TA/v5_treatment2/v5_apo_per1000.png}}
+  \end{subfigure}
+  \caption{Number of apoptotic cells: (TODO add Sophie histograms): A : Number of apoptotic cells during original treatment protocol; B: Number of apoptotic cells during treatment by Kirke protocol of increasing dose, with 3 treaments/week
+C : Number of apoptotic cells per 1000 during original treatment protocol; B: Number of apoptotic cells per 1000 during treatment by Kirke protocol}
+  \label{fig:thirdpoint4sophie_treatment_apo}
+\end{figure}
+
+
+\subsection{Adaptation of Skin}
+
+The reason for the increease in intensity during treatment in the Kirke protocol and similar ts that the skin adapts.
+
+
+
+What could be done experimentally? measure MED at least twice initially? 
+
+\subsection{Arrested Cells}
+
+We want to try arrested cells too
+
+under UV $TA \rightarrow R$ and $TA \rightarrow A$ in proportions $f_{arrest}$ and $1-f_{arrest}$.
+
+The $R$ cells are subsequently taken to behave like differentiated $D$ cells (that have arisen from TA cells in the normal way), and are lost by desquamation with the same kinetics. 
+
+The rate equation for the loss is $\sim D^2$. To maintain this correctly, with both $R$ and $D$ species, we need 
+\[ 
+\frac{d(D+R)}{dt} = \alpha (D+R)^2
+\]
+to distribute this between $D$ and $R$ species, it is natural to associate each quadratic term with the species of the same kind, and divide the $2DR$ term according to the fraction of cells of each type, i.e.
+\[
+\frac{dD}{dt} = \alpha (D^2 + \frac{D}{D+R} 2DR) 
+\]
+\[
+\frac{dR}{dt} = \alpha (R^2 + \frac{R}{D+R} 2DR) 
+\]
+
+
+The result is 
+\begin{figure}[h!]
+
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.1/v5_treatment_t450_detail.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.5/v5_treatment_t450_detail.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.9/v5_treatment_t450_detail.png}}
+  \end{subfigure}
+
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.1/v5_treatment_t450_detail_DR.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.5/v5_treatment_t450_detail_DR.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.9/v5_treatment_t450_detail_DR.png}}
+  \end{subfigure}
+
+  \caption{Number of cells during Kirke-styke treatment without adaptation but including 
+A/D: fraction 0.1 arrested; B/E: fraction 0.5 arrested; C/F: fraction 0.9 arrested. A-C: species SC, TA, D + R, Total Cells, IL, GF, IL + GF; D-F: species D and R.}
+
+  \label{fig:thirdpoint5sophie_treatment_totc}
+\end{figure}
+
+
+
+
+Still haven't fixed the GF/IL - SC/TA interaction (separate receptors?)
+
+lots of subsections to put  in here. 
+
+cytokine induced and treatment 
+treatment with increasing strength
+ ... commenting on the extra cells and 
+sensitivity analy to do 
+
+
+\section{Visualization}\label{sec:SWvisu}
+
+The Java code provided for the Zhang model (normal skin model) has been made to work locally with the assistance of Robert Stones (BSU). It produces images in .eps format, which can be converted to png ({\tt \$ convert -density 72  \$i.eps -flatten \$i.png}) and combined into an animation ({\tt \$ mencoder mf://*png -mf fps=4 -o output.mp4 ...}).
+
+It is desirable to get this to work for locally produced models (e.g. Weatherhead-like ODE). 
+The input to the Java code must be a series of (t,e) pairs, where t is a time point (adjacent time points not being equally spaced) and e is a numerical code for an event occuring at that time. It is necessary to convert the normal simulation outputs of cell populations at equally-sampled time points to this format, which
+has been done by saving the time course with small evenly-spaced time points, so that it is unlikely that more than one reaction will fire in each interval, and running a script to find the reactions that do occur. 
+
+This has been done with the iteration of the Sophie Weatherhead-like model from 
+section \ref{sec:SWaug16}. The model is run in stochastically, but, as Copasi does not allow SBML events in this mode, it is necessary to generate separate trajectories for each part (normal equilibration, high external cytokine, reequilibration in psoriatic state) and combine them. 
+
+
+The GA cell type in the Zhang model visualizer (immediately downstream of TA) is used to represent the differentiated D cell type in the Weatherhead-like model, and apoptosis of GA represents desquamation.
+
+Also, the process $TA \rightarrow GA$ is not explicitly represented in the visualizer,  but only $TA \rightarrow 2 GA$. Hence it is necessary to follow each reaction-firing of this kind with the apoptosis of a GA cell. This means that the apoptotic cell count is too high, and may introduce other artifacts. 
+
+Example snapshots from the trajectory are shown in fig. \ref{fig:visu_thirdpointtwosophie_cytostim}. It can be seen that although the model is crudely right a smooth epidermis is not produced; in the psoriatic state the epidermis is very uneven, which reflecting reality to some extent but is perhaps too extreme. 
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.85\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_cyto_induced/stochastic/frames/example_frame_normal.png}
+    \includegraphics[width=.85\linewidth]{\sophiesbml/third.2_go_SC_and_TA/v5_cyto_induced/stochastic/frames/example_frame_psoriatic.png}
+  \end{subfigure}
+  \caption{Visualization of the Weatherhead-like modesl: (a) normal skin; (b) psoriatic skin.}
+  \label{fig:visu_thirdpointtwosophie_cytostim}
+\end{figure}
+
+It may be desirable to re-introduce explicit species representing GA, SP, GC and CC cell types into the weatherhead-like model rather than a single D type. 
+
+
+
+\chapter{Keratinocyte Proliferation Modes (Phil Jones-Like)}\label{chapter-philjones}
+
+\section{Introduction}
+It has been shown \cite{roshan2016human} that Keratinocytes in culture have two modes of proliferation, expanding and balanced. Cells switch from exapnding to balanced when they become confluent, dependent on the ROCK2 kinase,  and back again when confluence is broken for eaxmple by a scratch. (A lot of this has been known for decades I think, see e.g. \cite{barrandon1987cell}, but I have to yet followed up references in detail.) (See next chapter on Genetics) 
+
+However, there may be some sort of programming, with obvious parallels in the Zhang model, because they say that some cells when plated out in culture will initally divide in the expanding mode but others will divide in the balanced mode (despite being far from confluence).
+
+see discussion for comments on possible mechanisms, aside from those mentioned in \cite{roshan2016human}.
+
+(put some figs from Roshan et al paper here) 
+
+\section{Simulations of Expanding and Balanced Colonies}
+
+\subsection{Introduction}
+We have implemented this in a simple way. We consider the 3 reaction system \\
+P $\rightarrow$ P + P ; rate $k_{1sp}$\\
+P $\rightarrow$ P + D ; rate $k_{1as}$ \\
+P $\rightarrow$ D + D ; rate $k_{1sd}$
+
+We also allow the proliferating cells to undergo apoptosis 
+
+P $\longrightarrow \varnothing$  ; rate $\beta_1$
+
+and the differentiated cells to undergo desquamation
+
+D $\longrightarrow \varnothing$  ; rate $\alpha$
+
+producing the differential equations
+\[
+\frac{dP}{dt} = (k_{1sp} - k_{1sd} - \beta_1) P
+% \frac{dP}{dt} = (k_{1sp} - k_{1sd}) P
+\]
+\[
+\frac{dD}{dt} = (2 k_{1sd} + k_{1as}) P - \alpha D 
+\]
+
+and chose rate constants so that reactions will fire in relative ratios
+$88:10:2$. This produces expanding colonies as in figure \ref{fig:joneslike_fixed_expand}
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.7\linewidth]{\jonessbml/first_go/expanding_stoch_1.png}
+  \end{subfigure}
+  \caption{Exponentially growing cell numbers in a Stochastic run of a model of expanding colonies with reaction propensity ratios P $\rightarrow$ P + P: 88, P $\rightarrow$ P + D: 10, P $\rightarrow$ D + D: 2}
+  \label{fig:joneslike_fixed_expand}
+\end{figure}
+
+However with ratios $38:28:34$ the model produces trajectories much more like those of balanced colonies, as in fig. \ref{fig:joneslike_fixed_balanced}.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\jonessbml/first_go/balanced_stoch_1.png}
+    \includegraphics[width=.31\linewidth]{\jonessbml/first_go/balanced_stoch_2.png}
+    \includegraphics[width=.31\linewidth]{\jonessbml/first_go/balanced_stoch_3.png}
+  \end{subfigure}
+  \caption{Cell numbers grow slowly in Stochastic run of a model of balanced colonies with reaction propensity ratios P $\rightarrow$ P + P: 38, P $\rightarrow$ P + D: 28, P $\rightarrow$ D + D: 34}
+  \label{fig:joneslike_fixed_balanced}
+\end{figure}
+
+\subsection{Distributions: Roshan et al supplementary figure}
+
+In supplementary figure 2d and 2e of \cite{roshan2016human}, The observed colony size distribution after 7 days is shown for observed (though it is not quite clear from which experimental system, I think that of figure 1, NFSK) and simulated colonies. The simulation is done from 30000 colonies with ``the observed proportions between balanced and expanding'', which if following NFSK figure 1 means 70:11. It also says in the text that expanding colonies the first three divisions were observed to always produce more proliferating cells (i.e. the reaction propersity is 100\% $P \rightarrow 2 P$ for 3 generations). This cannot be explicitly done in Copasi since individual cells cannot have a counter; it would requite an agent-based model. However, stochastic simulations starting from 1,2,4 and 8 cells initially have been carried out, and then run for 168, 152, 136 and 121 hours, corresponding approximately to 7 days - (0,1,2,3) $\times$ the median cell cycle time 15.7 hours.
+These were repeated 25926 times for balanced colonies (ie 70/81 * 30000) and 4074 times for expanding (11/81 * 30000). The result is shown in figure  \ref{fig:joneslike_sim_mixedlineages}. In comparison with the paper, it seems that
+the balanced simulations produce the correct distribution while number of small colonies produced by the expanding simulations is quite sensitive to initial conditions: the best match is actually obtained with simulation from 4 cells for 136 hours, but the effect of stochasticity in the cell cycle time, an effect not included in these simulations, could also have an effect. 
+
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.5\linewidth]{\jonessbml/fourth_go_stochastic/figs/colony_sizes_boxplot.png}
+    \includegraphics[width=.5\linewidth]{\jonessbml/fourth_go_stochastic/figs/colony_sizes_distribution.png}
+  \end{subfigure}
+  \caption{Boxplots of colony size distribution after 7 days from a mixed initial population of balanced and expanding lineages, in ratio 70:11, with 0,1,2,3 cycles of purely $P \rightarrow P+P$ divisions in the expanding lineages. Total number of stochastic simulations = 30000. Right: frequency plots of colony sizes for the balanced and 4 kinds of expanding colonies.}
+  \label{fig:joneslike_sim_mixedlineages}
+\end{figure}
+
+
+\section{Modelling the Change from Expanding to Balanced}
+
+The change from expanding to balanced could be modelled by making the rate
+depend on a Hill function, switching at a total cell number $C=C_0$
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.7\linewidth]{\jonessbml/second_go/hill_eqs.png}
+  \end{subfigure}
+  \caption{Hill equations for the switch between expanding or balanced growth modalities}
+  \label{fig:joneslike_hilleq}
+\end{figure}
+
+Over the timescale of a few hundred hours investigated bin \cite{roshan2016human} this leads to cell growth switching from expanding to balanced, but over a longer time scale it produces oscillations (if deterministic)  as the total cells overshoot or, if stochastic, a large colony which then gradually dies out (because the proliferating cells all differntiate during the period of high density)
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.31\linewidth]{\jonessbml/second_go/t192_determ.png}
+    \includegraphics[width=.31\linewidth]{\jonessbml/second_go/t10k_determ.png}
+    \includegraphics[width=.31\linewidth]{\jonessbml/second_go/t10k_stoch.png}
+  \end{subfigure}
+  \caption{Initial growth (t=0 to 192h ) cell growth overshoots the target; then over a longer period this results in oscillations (determ) or the  in Stochastic run the profliferating cells all die out, resulting eventually in all cells disappearing.}
+  \label{fig:joneslike_hill_oscill}
+\end{figure}
+
+The oscillations can be damped by increasing the apoptosis/differentiation rate
+from 0.01/hour to 0.03/hour.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.49\linewidth]{\jonessbml/second_go/t300_beta2_0_03_determ.png}
+    \includegraphics[width=.49\linewidth]{\jonessbml/second_go/t300_beta2_0_03_stoch.png}
+  \end{subfigure}
+  \caption{with higher initial apoptosis rate the approach to the equilibrium cell number occurs with strongly damped osciallations and the proliferating cells do not go to zero in stochastic runs}
+  \label{fig:joneslike_hill_damped_oscill}
+\end{figure}
+
+
+Which can be damped by increasing the apoptosis rate.
+
+
+\section{Change of Cell Density parameter in Hill Equations}
+
+(directory {\tt third\_go}). 
+Another way to change the effective totC at which the reactions switch from expanding to balanced is  either to reduce it for reactions 2,3 so they switch on earlier, or increase it for reaction 1. A large change is necessary, though. The timescale is also slowed. This could be analysed by looking at perturbations about equilibrium, as for e.g. Lotka-volterra model. 
+
+A suiable set of Hill functions is shown in figures \ref{fig:joneslike_hill_functions}, giving a set of rates of $35:30:35$. 
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+  \centering
+    \includegraphics[width=.4\linewidth]{\lisbml/pop_asymm/hill_law_rates_35-30-35.png}
+  \end{subfigure}
+  \caption{Hill functions for 3 reactions able to  give a set of rates of $35:30:35$.}
+  \label{fig:joneslike_hill_functions}
+\end{figure}
+
+Finally though the best way to stop oscillations is to make the Hill IC50 parameter depend on $P$ cells only not $totC$. - see figure \ref{fig:joneslike_hill_osc_PortotC}. This is reasonable if P and D cells are stratified and/or if only one cell type displays particular surface markers that provoke contact inhibition (Alberts ... Gorbun. N.M.R?)
+
+\[
+f_1 = \frac{1}{(1 + (P/P1)^{n1})}
+\]
+\[
+f_2 = 1 - (f_1 + f_3)
+\]
+\[
+f_3 = \frac{(P/P3)^{n3}}{(1 + (P/P3)^{n3})}
+\]
+
+\[
+k_{1sp} = k_{1b} f_1
+\]
+\[
+k_{1as} = k_{1b} f_2 
+\]
+\[
+k_{1sd} = k_{1b} f_3 
+\]
+
+
+
+This has the nice feature that at equilibrium the rates of $P \rightarrow 2P$ 
+and $P \rightarrow 2D$ equalize naturally, as can be seen in the right hand column of subfigures 
+
+
+
+% maybe move this from lisbml to jonesbml?? 
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.49\linewidth]{\lisbml/pop_asymm/PA_1_cellno.png}
+    \includegraphics[width=.49\linewidth]{\lisbml/pop_asymm/PA_1_fluxes.png}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=.49\linewidth]{\lisbml/pop_asymm/PA_2_cellno.png}
+    \includegraphics[width=.49\linewidth]{\lisbml/pop_asymm/PA_2_fluxes.png}
+  \end{subfigure}
+  \caption{Derministic trajectories of particle numbers (left) and reaction fluxes (right) for the simple model, with the Hill coefficient depending on $totC$ (top) or $P$ only (bottom)}
+  \label{fig:joneslike_hill_osc_PortotC}
+\end{figure}
+ 
+
+
+Comparison with logistic growth: TODO
+
+Background: Molecular Biology of the Cell \cite{alberts2008molecular} has a discussion of contact inhibtion at the end of the chapter on the cell cycle (Ch 17 in 5th Ed.). 
+
+
+
+\chapter{Other Pathways, Other Models}
+
+\section{Genetics}
+
+Apoptosis (refs), cytokine signalling. Those highlighted by PSORT/other gene expression profiling experiments. 
+
+DNA damage: work by Proctor et al \cite{passos2010feedback}
+
+
+Developmental: ROCK, Notch (see work by Phil Jones' group on conflence and somatic mutations in the skin), Wnt, Hh (see notes in discussion) etc. 
+
+These interact with the cell cycle, which is driven by CDK/cyclin synthesis and interaction, and has been extensively modelled, e.g. by Tyson, Novak and co-workers \cite{tyson1991modeling}. In the response to UV in psoriasis, the roles of c-Myc and p53 seem to be important and should be included \cite{freije2014inactivation,gandarillas2000normal}.
+
+Comparative analysis of five chronic inflammatory diseases by GWAS (Ellinghaus et al \cite{ellinghaus2016analysis})  implicated (I think) JAK2, ITGAL, NFKB1, ICAM1 (via hyaluronan), IL2RA and PRKCB in Psoriasis (fig 3 (or are these only drug-targeted genes?); Table 1; check supp tables for detailed info) 
+
+(also for Rheumatoid; JAK2 and CCR2 (receptor for CCL2 (MCP-1), CCL7 (MCP-3) and CCL13 (MCP-4)))
+
+
+\subsection{Jones group: ROCK}
+ROCK2 is found in Wnt p'way, but in a total of twelve signalling pathways (not including some disease pathways): Leukocyte transendothelial migration, cGMP-PKG signalling, cAMP signalling, chemokine signalling, sphingolipid signaling, VSM contraction, Focal Adhesion, platelet activation, regulation of actin cytoskeleton, oxytocin signalling, axon guidance. Discussion in \cite{roshan2016human} suggests the role in actin cytokeleton regulation. Genecards mentions it inhibits keratinocyte terminal differentiation. In the ``Regulation of actin cytoskeleton'' kegg p'way it is shown activated by Rho and inhibited by ERK (in the other pathways only the activation by Rho is shown) and phosphorylates five other components of the pathway. Focal Adhesion p'way starts with ECM-receptor interaction or cytokine-receptor interaction. In Wnt, it is present in the PCP subpathway, not the canonical. The cGMP-PKG pathway also links to phototransduction and nitric oxide synthase (NOS) (c.f. psoriasis phototherapy and work by Richard Weller), Ca$^{2+}$ signalling, and the calcineurin (CN)- NFAT - hypertrophy axis (see below). 
+
+Note that mTOR inhibition with rapamycin can actually increase proliferation (mentioned in Roshan, referring to Iglesias-Bartolome et al in Cell Stem Cell. See other papers in that journal, e.g. Castilho et al 2009 and comment on it by Wood and Sabatini. There is a relaion with WNT and with proliferation leading to senescence as tumour suppression mechanisms become activated. 
+
+\subsection{Proliferation - NFAT/calcineurin and FOXO}
+
+Systemic cyclosporin A and tacrolimus are effective treatments for psoriasis. Cyclosporin A and tacrolimus block T cell activation by inhibiting calcineurin and preventing translocation from the cytoplasm to the nucleus of the TF NFAT; this is thought to account for their activity against psoriasis. See previous work by NJ Reynolds group: \cite{aldaraji2002localization}. However CN and NFAT also drive hyperproliferation in cardiac hypertrophy, (unpublished work with Daryl Shanley/Elizavet Soumaka), which is opposed by FOXO via atrogin \cite{ni2006foxo, ni2007foxo, li2007atrogin}, reviewed in \cite{tremblay2008phosphatases} from which the figure \ref{fig:tremblayfoxonfat} is taken. Could the same pathway be active in keratinocyte/T-cell hyperproliferation as in cardiac? This would indicate a link with nutrition, and here have been reports of fasting helping psoriasis. Tremblay mentions CN and NFAT inhibitors. FOXO and FOXO inhibitors: Search ``FOXO* psoriasis'' finds Liu 2011, Shankar 2008, Srivastava 2010, about PI3K and MEK, EGCG in diet, and linking with Rheumatoid Arthritis. Search ``FOXO in epidermis'' finds several interesting papers: about FOXO inhibitors in cancer, about their role in control of epidermal morphogensis (with p63) (G\"{u}nschmann), about epidermal immunity, and about interaction with SMAD. FOXO may also promote apoptosis, though the mechanism is quite complex with both pro- and anti- apoptotic effects. Also refer to Calnan and Brunet (FOXO code) and other reviews in the 2008 special edition of Oncogene {\tt http://www.nature.com/onc/journal/v27/n16/index.html}, esp.: Peng, Foxo in the Immune System; Fu \& Tindal, FOXOs, Cancer and Regulation of Apoptosis; Ho, Myatt \& Lam, (about foxo and cell cycle/proliferation). Compare with e.g. Gilhar et al 2008, Fas pulls the trigger on psoriasis. 
+Note also special edition of BBA Nov 2011 on PI3K-AKT-FoxO axis in Cancer and Aging. 
+
+
+\begin{figure}[h!]
+    \centering  
+  \begin{subfigure}{.6\textwidth}
+    \includegraphics[width=\linewidth]{figs/tremblay_08_fig1.png}
+  \end{subfigure}
+  \caption{NFAT-Calcineurin-FOXO signalling in cardiac hypertrophy \cite{tremblay2008phosphatases}}
+  \label{fig:tremblayfoxonfat}
+\end{figure}
+
+
+\chapter{Agent-based modelling}
+
+\begin{quote} 
+Different  frameworks, e.g. MASON \cite{luke2005mason}, Matlab, \dots reviewed in \cite{macal2009agent}. \\
+\begin{description}
+\item [MASON] Home page is {\tt http://cs.gmu.edu/~eclab/projects/mason/} with link to pdf manual, with 14-part 50-plus page tutorial. MASON provides libraries and you have to write your model in Java. A simulation in MASON is used by M. Coles' group in York - see e.g. Peyer's Patch Development simulation, \cite{alden2012pairing} {\tt https://www.cs.york.ac.uk/immunesims/frontiers/}. 
+\item [Repast] {\tt https://repast.github.io/docs.html.} Provides a lot of flexibility; Repast ``Simphony'' provides ReLogo (netlogo-like) and  Repast Java; Repast HPC is designed for an MPI enviroment and you use C++, either full or, again, a simplified Logo-style C++. 
+\item [Mesa] {\tt http://mesa.readthedocs.io/en/latest/.} uses Python - that sounds like it would be easier to me, but seems much less mature than the above, and with fewer capabilities. Seems to be the work of only 2 people. Visualiation is done in a browser; (or could use matplotlib and put the static images together)
+\item [Flame] {\tt https://www.flame.ac.uk} Uses C - several users including epidermal model by Li et al. 
+\item [Newcastle projects] Sophie Weatherhead's netlogo model; for netlogo in immunology see \cite{chiacchio2014agent}\\
+NUFEB modifications to LAMMPS \\
+Have had a meeting with Jonny Naylor and discussed - he is quite keen to be involved \\
+Neuroscience - Biodynamo \\
+\end{description}
+
+Other agent-based modelling  in psoriasis specifically 
+\cite{sutterlin2009modeling}, and in the skin: \cite{li2013skin}.
+
+Modelling of the thickening of the epidermis (rete ridges) \cite{iizuka2004psoriatic}, and others, e.g. about buckling? 
+(see text I wrote earlier : gsk\_meeting\_sep15/notes\_on\_papers.txt. Bangham and Coen on modelling the growth of tissue, especially in plants; buckling cascades; extensive physics literature; (Foppl-van Karman equation), application to fingerprints  Kuecken + Newell, EPL 2004, {\tt http://iopscience.iop.org/article/10.1209/epl/i2004-10161-2/pdf})
+
+
+
+ \end{quote} 
+
+
+\chapter{Discussion}
+
+
+
+(I have not found a paper explicitly comparing anti-cytokine and UVB treatments in psoriasis.)
+\\
+
+As mentioned before, it was shown in \cite{hsu2014transit} that (in mouse hair follicle cells) in fact TA cells {\em stimulate} SC division
+ (amongst that fraction of the SC population that is quiescent), and do so via Hh signalling. References in the discussion section of this paper describe populations of quiescent and primed SC that have been shown to coexist in digestive (intestine) and haematopoetic systems as well as hair follicles. (cf reviews by \cite{li2010coexistence}, in which Wnt signalling is implicated, and \cite{xin2016hardwiring}). 
+With regard to the role of Hh in psoriasis, some early studies suggested that the pathway inhibitor cyclopamine could have a therapeutic role, (eg Tas and Avci 2004), 
+but a more recent paper (Lack of Evidence for Activation of the Hedgehog Pathway in Psoriasis, Gudjonsson et al 2009) seems to have contradicted this  - though the interpretation is again complex because the measurments where at the mRNA level and this pathway is much regulated post tranlationally. Moreover measurements of cell fractions, and possibly at the single-cell level, would be helpful where SC make up only a small proportion of the tissue. 
+\\
+Work by Phil Jones's lab on coexisting SC subpopulations: 
+suggest they have two modes of proliferation \cite{roshan2016human} and also 
+high heterogeneity due to somatic mutation \cite{martincorena2015high}. Highlight role of contact
+inhibition. 
+
+For pathways, see SA Biosciences - http://www.sabiosciences.com/pathway.php?sn=Notch\_Signaling - SC and development arrays refer to Notch, Wnt and Hh amongst others. 
+\\
+In connecting with experiment single-cell would be ideal, but also it might be worth trying to apply CIBERSORT which tries to deconvolve measurements into contributions from different tissues (cf. Sharmila Rana, QMUL, on RA-MAP project).
+\\ 
+
+There was an interesting paper where biopsies were taken from the edges of the plaques to study the spread.
+
+
+Regarding the possible mechanisms of the ``two modes of proliferation'' of keratinocytes, I'm not sure if possible epigenetic mechanisms have been investigated;  they have, however, for the EMT e.g. O.G. McDonald, Genome-scale epigenetic reprogramming during epithelial-to-mesenchymal transition, Nature SMB 2011, which is relevant to wounding. (google cell culture confluence epigenetics), (google keratinocyte epigenetics, or that with psoriasis) .. (Eckert, polycomb group proteins; Gudjonsson and Krueger commenting on robertson et al 2012, with other intereting refs; other papers about e.g. 14-3-3)
+
+
+\newpage
+
+\bibliography{tech_report} 
+\bibliographystyle{apalike}
+
+\end{document} 
