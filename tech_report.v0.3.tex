@@ -9,6 +9,7 @@
 
 % other [options]: draft, 11pt notitlepage - draft uses placeholders for figs and is faster.
 
+% 13/6/17 put on github 
 % v0.3 30/8/16 + (after printing out v0.2) 
 % v0.2 25/7/16 +
 
@@ -37,6 +38,7 @@
 % lots of examples of equations/maths: http://www.personal.ceu.hu/tex/cookbook.html 
 % formatting captions:subcaption doc and http://www.peteryu.ca/tutorials/publishing/latex_captions
 
+\newcommand{\papersd}{/home/ngrs2/work/bsu/papers/psoriasis}
 \newcommand{\psortbase}{/home/ngrs2/work/bsu/PSORT_Zuliani_Reynolds/}
 \newcommand{\zhangmatlab}{\psortbase/zhang_model}
 \newcommand{\sbmlbase}{\psortbase/sbml-sh/}
@@ -45,6 +47,8 @@
 \newcommand{\sophienlgo}{\psortbase/netlogo_model}
 \newcommand{\jonessbml}{\sbmlbase/jones_like}
 \newcommand{\lisbml}{\sbmlbase/li_like}
+\newcommand{\apobase}{\psortbase/apoptosis/}
+\newcommand{\eissingd}{\apobase/eissing/}
 % make subfigure labels capital A,B,C not (a),(b),(c)
 \renewcommand{\thesubfigure}{\Alph{subfigure}}
 \captionsetup[subfigure]{labelformat=simple, labelsep=space}
@@ -1203,7 +1207,7 @@ The result is
     {\includegraphics[width=.3\linewidth]{\sophiesbml/third.5_go_SC_and_TA/v5_treatment/farrest0.9/v5_treatment_t450_detail_DR.png}}
   \end{subfigure}
 
-  \caption{Number of cells during Kirke-styke treatment without adaptation but including 
+  \caption{Number of cells during Kirke-style treatment without adaptation but including 
 A/D: fraction 0.1 arrested; B/E: fraction 0.5 arrested; C/F: fraction 0.9 arrested. A-C: species SC, TA, D + R, Total Cells, IL, GF, IL + GF; D-F: species D and R.}
 
   \label{fig:thirdpoint5sophie_treatment_totc}
@@ -1220,6 +1224,16 @@ cytokine induced and treatment
 treatment with increasing strength
  ... commenting on the extra cells and 
 sensitivity analy to do 
+
+\subsection{Biologics}
+
+Is this the place for it? Did in march or something, a $B$ that would remove
+the $GF$ species.
+
+Note (26 Jun 17) Efalizumab (Raptiva) - a humanized anti-CD11a monoclonal antibody.(see ITGAL). Withdrawn because of side effcts. 
+{\tt https://www.fda.gov/downloads/drugs/drugsafety/postmarketdrugsafetyinformationforpatientsandproviders/ucm143346.pdf}.
+
+
 
 
 \section{Visualization}\label{sec:SWvisu}
@@ -1439,6 +1453,141 @@ Comparison with logistic growth: TODO
 Background: Molecular Biology of the Cell \cite{alberts2008molecular} has a discussion of contact inhibtion at the end of the chapter on the cell cycle (Ch 17 in 5th Ed.). 
 
 
+
+\chapter{Apoptosis Models}
+
+\section{Introduction}
+
+
+In the above models, apoptosis is treated as a ``black box'' process, resulting from UV irradiation (possibly with a phenomenological inclusion of DNA damage in the work on adaptation) without any molecular detail. However it is useful to include such detail as a way of connecting explicitly with experiment in PSORT (to the extent that biological drugs may induce it) or Rosetrees.
+
+Pathways: Extrinsic (receptor mediated) and/or Intrinsic. 
+These convege on mutual activation of initiator and effector (e.g. casp3) caspases. In the extrinsic pathway the initiator is typically casp-8 (and/or -10), in the intrinsic more typically casp-9. (In both Mitochondrial release of Cyt C is usually essential.)
+
+I was aware of mathematical modelling of apoptosis in work of Rehm et al 2006 \cite{rehm2006systems}, subsequently adapted to a model of cancer prognosis \cite{hector2009apoptosis}
+
+The first model to be investigated is that by Albeck et al (Peter Sorger), which is attractive in that it includes both receptor-driven and mitochondrial pathways \cite{albeck2008quantitative}
+
+Secondly the simpler model of caspase mutual activation from several papers by Eissing et al. (the first from 2004, \cite{eissing2004bistability}) was investigated. These models are explicitly bistable, unlike the Albeck et al model. The turnover of all components is important in achieving this. 
+
+Another interesting reference is Legewie et al Plos CB 2006. (intrinsic pathway), in which turnover is also present \cite{legewie2006mathematical}
+and the book ``systems Biology of apoptosis'', Inna N Lavrik 2013.
+\cite{lavrik2010systems} (check citation?)
+
+There has been quite a lot of other work done on modelling apoptosis (perhaps because of its importance in cancer treatment). e.g. Fussenegger et al, Bagci et al \cite{bagci2006bistability}.
+ 
+(It is interesting that apoptosis tends to be activated even in stochastic models after sufficent time (months or years)  even in the presence of tight-binding inhibitors. I wonder if this has some relevance to e.g. neurodegeneration (apoptosis of neurons)). 
+
+Inhibitors: FLIP (CFLAR) for C8, XIAP for C3 , maybe XIAP for C9 too (Legewie).
+Skurk et al (2004 JBC) found FOXO3a inhibits FLIP. Wang et al (2017 apoptosis) say that Sirt-2 mediated Foxo3a deacetylation drives nucl translocation and FasL-induced apoptosis during ischemia reperfusion.
+
+\subsection{Albeck}
+
+Model...\cite{albeck2008quantitative}
+
+Apply changes in concentration from measurements 
+
+\subsection{Eissing}
+
+This is a fairly simple model whose structure is shown in figure \ref{fig:eissing_wiring}. Models are not available in Biomodels, were input manually in sbml-sh from expressions given in paper\cite{eissing2004bistability}. 
+
+\begin{figure}[h!]
+  \subcaptionbox{}
+  {\includegraphics[width=.5\linewidth]{\papersd/eissing_04_fig1.png}}
+  \subcaptionbox{}
+  {\includegraphics[width=.5\linewidth]{\papersd/eissing_05_fig1.png}}
+  \caption{Wiring diagrams of Eissing Model, schematics taken from original publications. A: from \cite{eissing2004bistability} fig 1, B: from \cite{eissing2005robustness} fig 1} 
+  \label{fig:eissing_wiring}
+\end{figure}
+
+\subsubsection{Activation}
+
+Activation: This is induced by setting a finite initial value for the species C8a (corresponding to C8*, i.e. active Caspase-8, in the paper). 
+Scanning C8a.initial produces the behaviour is shown in figure \ref{fig:eissing_scanc8a}.
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/scan_c8a_low_numbers.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/scan_c8a_high_numbers.png}}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/scan_c8a_low_flux.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/scan_c8a_high_flux.png}}
+  \end{subfigure}
+  \caption{Reaction particle numbers (A,B) and fluxes(C,D) for Eissing model. For initial C8a (active Caspase 8) inputs in range $0\ldots74$ (just below bifurcation point) and $100\ldots1000$. Names similar to fig \ref{fig:eissing_wiring} but BAR=CARP (the C8 inhibitor) and inhibitor complex names are simplified, lacking the reference to the inhibitor component. Reaction numbers as in figure \ref{fig:eissing_wiring}B.}
+  \label{fig:eissing_scanc8a}
+\end{figure}
+
+The model does not activate for $C8a(0) <= 74$. (note that because C8a binds strngly to its inhibitor, the amount of free C8a is always very low in any non-activating scenario; the majority is held as an inhibited complex which degrades.
+The amount of active C3 never exceeds 0.4 mol/cell.  The initial equilibration
+phase (where the C8a can activate some C3 before being sequestered) is important.
+The slowest reaction to equilibrate seems to be r9deg, over 100 min.
+
+
+
+\subsubsection{PSORT data}
+
+As for Albeck model, use experimental fold changes between baseline and 12wk. This in fact affects only 3 species: $C8$ (up 1.127-fold), $C3$ (up 1.148) and $IAP$ (up 1.025). The $C8$ inhibitor $BAR$ (gene name CFLAR) was not found.
+
+This reduces the threshold for activation to $45 < C8a(0) < 46$, and activation occurs slightly earlier for any given level of C8a.
+
+
+map experimental particle numbers to species using a dictionary file
+(hand made in this case, or can use URN annotation in biomodels files)
+
+
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/for_de/scan_c8a_low_numbers.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/for_de/scan_c8a_high_numbers.png}}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/for_de/scan_c8a_low_flux.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/for_de/scan_c8a_high_flux.png}}
+  \end{subfigure}
+  \caption{Reaction particle numbers (A,B) and fluxes(C,D) for Eissing model with numbers increased according to fold-chang between baseline and 12 weeks in PSORT data. For initial active Caspase 8 inputs in range $0\ldots45$ (just below bifurcation point) and $100\ldots1000$. cf figure \ref{fig:eissing_scanc8a}.}
+  \label{fig:eissing_scanc8a_de}
+\end{figure}
+
+
+
+This implies a net increase in sensitivity to apoptosis, as shown in figure \ref {fig:eissing_compare_act}
+\begin{figure}[h!]
+  \begin{subfigure}{\textwidth}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/for_de/compare_activation.png}}
+    \subcaptionbox{}
+    {\includegraphics[width=.5\linewidth]{\eissingd/for_de/compare_activation_ratio.png}}
+  \end{subfigure}
+  \caption{Time to activation (half-maximal $C3a$) for baseline model and
+    after concentration changes after 12 weeks, for different values of stimulus $C8a(t=0)$ (A): times (B) ratio of times (Baseline/after 12 wk) as fn. of baseline activation time.}
+  \label{fig:eissing_compare_act}
+\end{figure}
+
+
+  
+
+sensitivity
+
+
+\subsection{Legewie}
+
+Paper \cite{legewie2006mathematical}, mutual activation model with similar structure to Eissing et al. but CASP3 and CASP9 this time. 
+WT model activation should (?) be stopped at low but param scan of APAF-1
+fails to achieve that... 
+
+try varying XIAP initial conc  ... eventually falls though (turnover)
+
+try varying XIAP initial *synth rate*  - can make it never-activate.
+should APAF-1 have been controlled by synth/deg too?
 
 \chapter{Other Pathways, Other Models}
 
